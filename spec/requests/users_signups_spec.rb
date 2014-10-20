@@ -1,11 +1,21 @@
 require 'spec_helper'
 
-describe "UsersSignups" do
-  describe "GET /users_signups" do
-    it "works! (now write some real specs)" do
-      # Run the generator again with the --webrat flag if you want to use webrat methods/matchers
-      get users_signups_path
-      response.status.should be(200)
+class UsersSignupTest < ActionDispatch::IntegrationTest
+
+  test "invalid signup information"  do
+    get signup_path
+    assert_no_difference 'User.count' do
+      post users_path, user: {name: "", email: "user@invalid", password: "foo", password_confirmation: "bar"}
     end
+    assert_template 'users/new'
+  end
+
+  test "valid signup information"  do
+    get signup_path
+    assert_difference 'User.count', 1 do
+      post_via_redirect users_path, user: {name: "Test Name", email: "user@valid.com", password: "foobar", password_confirmation: "foobar"}
+    end
+    assert_template 'users/show'
   end
 end
+
